@@ -56,27 +56,30 @@ public class PlayerStat : ISavable
         GameEventsManager.Instance.PlayerEvents.StatPointChange(StatPoint);
     }
 
+    /// <summary>
+    /// 스테이터스 UI에서 스탯을 상승시켰을 때 호출되는 함수
+    /// </summary>
     public void IncreaseStat(StatType statType)
     {
         switch (statType)
         {
             case StatType.Health:
                 Stats.Health.MaxValue += 10;
-                Stats.Health.CurrentValue += 10;
+                Stats.Health.BaseValue += 10;
                 break;
             case StatType.Mana:
                 Stats.Mana.MaxValue += 10;
-                Stats.Mana.CurrentValue += 10;
+                Stats.Mana.BaseValue += 10;
                 break;
             case StatType.ManaRegen:
                 Stats.ManaRegen.MaxValue += 2;
-                Stats.ManaRegen.CurrentValue += 2;
+                Stats.ManaRegen.BaseValue += 2;
                 break;
             case StatType.Strength:
-                Stats.Strength.CurrentValue += 5;
+                Stats.Strength.BaseValue += 5;
                 break;
             case StatType.Defense:
-                Stats.Defense.CurrentValue += 5;
+                Stats.Defense.BaseValue += 5;
                 break;
         }
     }
@@ -133,7 +136,6 @@ public class PlayerStat : ISavable
 
     public void UnequipAllItems()
     {
-        Debug.Log("전부 장착해제");
         List<EquipmentSO> currentlyEquipped = new List<EquipmentSO>(EquippedItems.Values);
 
         foreach (EquipmentSO equipment in currentlyEquipped)
@@ -141,6 +143,7 @@ public class PlayerStat : ISavable
             UnEquipItem(equipment.GetStatModifiers());
         }
 
+        Debug.Log("인벤토리 클리어");
         EquippedItems.Clear();
     }
 
@@ -182,11 +185,12 @@ public class PlayerStat : ISavable
 
     public void LoadData(GameSaveData data)
     {
-        //UnequipAllItems();
-
         Level = data.PlayerData.Level;
         Experience = data.PlayerData.Experience;
         StatPoint = data.PlayerData.StatPoint;
+
+        GameEventsManager.Instance.PlayerEvents.StatPointChange(data.PlayerData.StatPoint);
+        GameEventsManager.Instance.PlayerEvents.PlayerLevelChange(data.PlayerData.Level);
 
         foreach (var statData in data.PlayerData.Stats)
         {
@@ -213,9 +217,6 @@ public class PlayerStat : ISavable
                     GameEventsManager.Instance.PlayerEvents.PlayerDefenseChange(statData.CurrentValue);
                     break;
             }
-
-            GameEventsManager.Instance.PlayerEvents.StatPointChange(data.PlayerData.StatPoint);
-            GameEventsManager.Instance.PlayerEvents.PlayerLevelChange(data.PlayerData.Level);
         }
     }
 }

@@ -59,6 +59,7 @@ public class InventoryHandler : MonoBehaviour
     /// </summary>
     public void RestoreEquippedState(Slot slot)
     {
+        Debug.Log("인벤 복구");
         if (slot.slotData.Item is not EquipmentSO equipment) return;
 
         Equip(slot);

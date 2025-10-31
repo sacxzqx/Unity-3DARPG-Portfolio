@@ -136,9 +136,19 @@ public class ItemManager : MonoBehaviour, ISavable
 
     public void LoadData(GameSaveData data)
     {
+        // 로드시에 현재 장비중인 장비들을 해제
+        foreach (var slot in equipmentInventory.Slots)
+        {
+            if (slot.IsEquipped && slot.Item is EquipmentSO equipment)
+            {
+                GameEventsManager.Instance.ItemEvents.UnequipItem(equipment);
+            }
+        }
+
         SaveDataToInventory(consumableInventory, data.PlayerData.ConsumableInventoryData);
         SaveDataToInventory(equipmentInventory, data.PlayerData.EquipmentInventoryData);
 
+        // 로드된 인벤토리에 따라 장비 재장착
         GameEventsManager.Instance.ItemEvents.InventoryReloaded();
     }
 

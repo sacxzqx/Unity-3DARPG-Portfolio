@@ -10,7 +10,18 @@ public class Stat
     public float BaseValue
     {
         get { return baseValue;  }
-        private set { baseValue = value; }
+        set
+        {
+            float oldValue = baseValue;
+            baseValue = Mathf.Clamp(value, 0, MaxValue);
+
+            if (oldValue != baseValue)
+            {
+                CalculateFinalValue();
+            }
+
+            TriggerStatChanged();
+        }
     }
 
     private float maxValue;
@@ -56,8 +67,8 @@ public class Stat
     public Stat(StatType type, float baseValue, float maxValue, bool isMaxValueModifier)
     {
         this.type = type;
-        BaseValue = baseValue;
         MaxValue = maxValue;
+        BaseValue = baseValue;
         CurrentValue = BaseValue;
         IsMaxValueModifier = isMaxValueModifier;
     }
@@ -94,13 +105,14 @@ public class Stat
         }
         else
         {
-            CurrentValue = BaseValue;
+            float finalValue = BaseValue;
+
             foreach (float modifier in modifiers)
             {
-                CurrentValue += modifier;
+                finalValue += modifier;
             }
 
-            CurrentValue = Mathf.Clamp(CurrentValue, 0, MaxValue);
+            CurrentValue = finalValue;
         }
     }
 

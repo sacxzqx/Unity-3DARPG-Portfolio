@@ -1,9 +1,11 @@
 using System.Collections;
-using System.Collections.Generic;
-using Unity.VisualScripting;
-using Unity.VisualScripting.Antlr3.Runtime.Misc;
 using UnityEngine;
 
+/// <summary>
+/// 플레이어의 기본 능력치(PlayerStat)와 상태를 관리하는 컴포넌트
+/// 장비 장착/해제, 아이템 사용, 버프 적용, 경험치 획득, 마나 재생 등
+/// 게임 이벤트에 반응하여 플레이어의 영구적인 상태를 업데이트하고 동기화
+/// </summary>
 public class PlayerStatus : MonoBehaviour
 {
     [SerializeField] private PlayerContext playerContext;
@@ -87,6 +89,10 @@ public class PlayerStatus : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 장비 아이템 해제 이벤트 처리. 해당 장비의 능력치 변화를 반영하고 장착 목록에서 제거
+    /// </summary>
+    /// <param name="equipment">해제할 장비 아이템 SO</param>
     private void HandleItemUnequipped(EquipmentSO equipment)
     {
         // 장착된 아이템 목록에 해당 아이템이 있는지 다시 한번 확인
@@ -112,6 +118,9 @@ public class PlayerStatus : MonoBehaviour
         return playerStat.EquippedItems.ContainsKey(type);
     }
 
+    /// <summary>
+    /// 버프 스킬 적용 이벤트 처리. 대상 스탯에 모디파이어를 추가하고, 지속 시간 후 제거하는 코루틴을 시작
+    /// </summary>
     private void HandleBuff(SkillSO buffSkill)
     {
         if (buffSkill.Type != SkillType.Buff) return;
@@ -149,6 +158,9 @@ public class PlayerStatus : MonoBehaviour
         targetStat.RemoveModifier(modifierValue);
     }
 
+    /// <summary>
+    /// 적에게 주는 스킬 데미지에 플레이어의 힘(Strength) 스탯을 추가로 반영
+    /// </summary>
     private int AddStrengthDamage(SkillSO _, int currentDamage)
     {
         int strengthValue = Mathf.RoundToInt(playerStat.Stats.Strength.CurrentValue);
@@ -163,7 +175,7 @@ public class PlayerStatus : MonoBehaviour
     }
 
     /// <summary>
-    /// 1초마다 마나 재생량만큼 현재 마나를 회복시키는 코루틴
+    /// 10초마다 마나 재생량만큼 현재 마나를 회복시키는 코루틴
     /// </summary>
     private IEnumerator ManaRegenerationCoroutine()
     {
